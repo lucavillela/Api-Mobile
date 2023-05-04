@@ -8,6 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
                 while((linha=reader.readLine()) != null) {
                     buffer.append(linha);
                 }
-
             } catch (MalformedURLException e){
                 throw new RuntimeException(e);
             } catch (IOException e) {
@@ -72,9 +74,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            ResultadoApi.setText(s);
+        protected void onPostExecute(String resultado) {
+            super.onPostExecute(resultado);
+            Cep cep = new Cep();
+
+            try {
+                JSONObject jsonObject = new JSONObject((resultado));
+                cep.setRua(jsonObject.getString("logradouro"));
+                cep.setBairro(jsonObject.getString("bairro"));
+                cep.setLocalidade(jsonObject.getString("localidade"));
+                cep.setUf(jsonObject.getString("uf"));
+                cep.setDdd(jsonObject.getString("ddd"));
+                ResultadoApi.setText(
+                        "Rua: " + cep.getRua()
+                        + "\nBairro: " + cep.getBairro()
+                        + "\nCidade: " + cep.getLocalidade()
+                        + "\nEstado: " + cep.getUf()
+                        + "\nDDD: " + cep.getDdd()
+                );
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
+
     }
 }
